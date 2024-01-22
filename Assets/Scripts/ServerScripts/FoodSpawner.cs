@@ -1,9 +1,7 @@
-using System;
 using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using Utils;
-using Random = UnityEngine.Random;
 
 namespace ServerScripts
 {
@@ -11,7 +9,7 @@ namespace ServerScripts
     {
         [SerializeField] private GameObject prefab;
 
-        private const int MaxPrefabCount = 50;
+        private const int MaxPrefabCount = 80;
         
         private void Start()
         {
@@ -21,7 +19,7 @@ namespace ServerScripts
         private void SpawnFoodStart()
         {
             NetworkManager.Singleton.OnServerStarted -= SpawnFoodStart;
-            for (var i = 0; i < 30; i++)
+            for (var i = 0; i < MaxPrefabCount; i++)
             {
                 SpawnFood();
             }
@@ -38,8 +36,8 @@ namespace ServerScripts
 
         private Vector3 GetRandomPosition()
         {
-            var x = Random.Range(5, 17);
-            var y = Random.Range(0, 10);
+            var x = Random.Range(0f, 35f);
+            var y = Random.Range(0f, 19f);
             return new Vector3(x, y, 0);
         }
 
@@ -47,7 +45,7 @@ namespace ServerScripts
         {
             while (true)
             {
-                yield return new WaitForSeconds(2f);
+                yield return new WaitForSeconds(0.5f);
                 if (NetworkObjectPool.Singleton.GetCurrentPrefabCount(prefab) < MaxPrefabCount)
                 {
                     SpawnFood();

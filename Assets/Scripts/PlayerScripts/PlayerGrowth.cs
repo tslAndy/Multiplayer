@@ -1,18 +1,46 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
+using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerGrowth : MonoBehaviour
+namespace PlayerScripts
 {
-    // Start is called before the first frame update
-    void Start()
+    public class PlayerGrowth : NetworkBehaviour
     {
-        
-    }
+        [SerializeField] private float startMass;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        private readonly NetworkVariable<float> _radius = new();
+        public float Radius => _radius.Value;
+
+        public float CurrentMass { get; private set; }
+        private Vector3 _startScale;
+        private PlayerController _controller;
+        private SpriteRenderer _renderer;
+
+        private void Start()
+        {
+            CurrentMass = startMass;
+            _startScale = transform.localScale;
+            _controller = GetComponent<PlayerController>();
+            _renderer = GetComponent<SpriteRenderer>();
+            
+            if (IsOwner) UpdateRadiusServerRpc(_renderer.bounds.size.x);
+        }
+
+        [ClientRpc]
+        public void AddMassClientRpc(float mass)
+        {
+            CurrentMass += mass;
+            transform.localScale = _startScale * (CurrentMass / startMass);
+            _controller.UpdateSpeed(startMass / CurrentMass);
+            if (IsOwner) UpdateRadiusServerRpc(_renderer.bounds.size.x);
+
+        }
+
+        [ServerRpc]
+        private void UpdateRadiusServerRpc(float radius)
+        {
+            //Debug.Log(radius);
+            _radius.Value = radius;
+        }
     }
 }
