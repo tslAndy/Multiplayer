@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 
 namespace ServerScripts
 {
-    public class FoodSpawner : MonoBehaviour
+    public class FoodSpawner : NetworkBehaviour
     {
         [SerializeField] private GameObject prefab;
 
@@ -38,14 +38,14 @@ namespace ServerScripts
 
         private Vector3 GetRandomPosition()
         {
-            var x = Random.Range(5, 20);
-            var y = Random.Range(0, 15);
+            var x = Random.Range(5, 17);
+            var y = Random.Range(0, 10);
             return new Vector3(x, y, 0);
         }
 
         private IEnumerator SpawnOverTime()
         {
-            while (NetworkManager.Singleton.ConnectedClients.Count > 0)
+            while (true)
             {
                 yield return new WaitForSeconds(2f);
                 if (NetworkObjectPool.Singleton.GetCurrentPrefabCount(prefab) < MaxPrefabCount)
